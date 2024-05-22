@@ -14,5 +14,6 @@ infinitos, ruptura de ciclos, programación orientada a objetos, cadena de carac
 IDEA: CAJERO AUTOMÁTICO:
 - Ingreso de Dinero
 - Egreso de Dinero
+- Informes en base a las operaciones
 - Transferencias ??
 """
