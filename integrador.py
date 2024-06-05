@@ -17,23 +17,13 @@ IDEA: CAJERO AUTOMÁTICO:
 - Informes en base a las operaciones
 
 ALCANCE:
-Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero automático, el mismo debe permitir egresos de sumas de dinero. 
-Se identifica el cajero con un numero random (✔).
-Se ingresa una tarjeta al sistema, que va a tener números aleatorios (✔).
 
-/// Nuestro sistema NO verifica que la tarjeta sea válida, de esta instancia se encarga otra red que nos proporciona esta información. El cajero tendrá una función random que dirá si la tarjeta es válida o no (Quizas no necesitemos esto) ///. 
-
-El cajero tiene un monto fijo total que se va debitando conforme se hace cada extracción (✔).
-Además, tiene una suma fija de billetes (de 2000, de 1000, de 500, de 100) que entrega(✔).
-
-Por cada extracción se optimizará qué billetes van a ser brindados.
-El sistema termina al ingresar -1 como monto de extracción y deberá informar:
+Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero automático, el mismo debe permitir egresos de sumas de dinero. Se identifica el cajero con un numero random. Se ingresa una tarjeta al sistema, que va a tener números aleatorios. El cajero tiene un monto fijo total que se va debitando conforme se hace cada extracción. Además, tiene una suma fija de billetes (de 2000, de 1000, de 500 y de 100) que entrega. Por cada extracción se optimizará qué billetes van a ser brindados. El sistema termina al ingresar -1 como monto de extracción y deberá informar:
 •	Lista de transacciones que se hicieron en el día
-•	Lista de transacciones que se hicieron en el día por tarjeta (ordenado y sin duplicados de tarjeta)
+•	Lista de transacciones que se hicieron en el día por tarjeta (ordenado ascendiente y sin duplicados de tarjeta)
 •	Consulta de cantidad de extracciones por tarjeta
 •	La transacción (monto mínimo) que se extrajo en el día
 •	La tarjeta que extrajo el monto máximo (acumulado por tarjeta)
-
 """
 
 # Variables
