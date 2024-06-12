@@ -36,8 +36,45 @@ listaEgresos = []
 
 def tarjetaRandom():
     numeroRandom = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    print("Su num de tarjeta es: ",numeroRandom)
     tarjetas.append(numeroRandom)
     return tarjetas
+
+def nuevoMovimiento():
+    consulta = int(input("""
+                         ¿Desea realizar otro retiro?
+                         1- SI
+                         2- NO
+                            """))
+    while consulta < 1 or consulta > 2:
+        print("Opción inválida, elija una opcion correcta")
+        consulta = int(input("""
+                         ¿Desea realizar otro retiro?
+                         1- SI
+                         2- NO
+                            """))
+    if consulta == 1:
+        montoEgreso = int(input("Ingrese un importe de dinero a retirar: $"))
+        total = cantidaEnCajero(billetes_valores,billetes_cantidades)
+
+        while total < montoEgreso:
+            print("El monto supera la cantidad disponible en el cajero")
+            montoEgreso = int(input("Ingrese un nuevo importe de dinero a retirar: $"))
+        else:
+            sacarPlata(montoEgreso, billetes_valores, billetes_cantidades)
+    else:
+        print("""
+              Muchas gracias por elegirnos! 
+              Por favor, retire su tarjeta y deje pasar al siguiente usuario""")
+        tarjetaRandom()
+        montoEgreso = int(input("Ingrese un importe de dinero a retirar: $"))
+        total = cantidaEnCajero(billetes_valores,billetes_cantidades)
+
+        while total < montoEgreso:
+            print("El monto supera la cantidad disponible en el cajero")
+            montoEgreso = int(input("Ingrese un nuevo importe de dinero a retirar: $"))
+        else:
+            sacarPlata(montoEgreso, billetes_valores, billetes_cantidades)
 
 # Repensar utilizando un For (listas[i])
 def sacarBilletes(index,importe, listaBilletes, listaCantidad):
@@ -61,13 +98,14 @@ def sacarBilletes(index,importe, listaBilletes, listaCantidad):
             totalFaltante = importe -(cantidadDeBilletes * listaBilletes[index])
             continuar=False
             print("Se entregan: ", cantidadDeBilletes, " billetes de ",listaBilletes[index])
-            listaEgresos.append(importe)
     return totalFaltante
 
 def sacarPlata(importe, billetesValor, billetesCantidad):
+    listaEgresos.append(importe)
     for i in range(len(billetesCantidad)):
         if importe > 0:
             importe = sacarBilletes(i,importe, billetesValor, billetesCantidad)
+    nuevoMovimiento()
 
 def informarTransaciones():
     print(listaEgresos)
@@ -81,7 +119,6 @@ def cantidaEnCajero(billetesValor,billetesCantidad):
 def main(): # Funcion principal
     print("Número de Cajero: #", numeroDeCajero)
     tarjetaRandom()
-    print("Su num de tarjeta asignado es: ",tarjetas)
     montoEgreso = int(input("Ingrese un importe de dinero a retirar: $"))
     total = cantidaEnCajero(billetes_valores,billetes_cantidades)
 
@@ -90,6 +127,8 @@ def main(): # Funcion principal
         montoEgreso = int(input("Ingrese un nuevo importe de dinero a retirar: $"))
     else:
         sacarPlata(montoEgreso, billetes_valores, billetes_cantidades)
+
+    informarTransaciones()
 
 if __name__=='__main__': # Entry Point
     main()
