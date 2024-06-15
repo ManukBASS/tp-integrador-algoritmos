@@ -26,13 +26,16 @@ Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero auto
 •	La tarjeta que extrajo el monto máximo (acumulado por tarjeta)
 """
 
+# Condicion de fin (-1) (✔)
+# Egresos múltiplos de 100 (✔)
+# Cortar cuando el cajero llege a 0 (✔)
 # Variables
 billetes_valores = [2000, 1000, 500, 100]  # Valores de los billetes ($54000 con los billetes que tenemos) #(✔)
 billetes_cantidades = [10, 20, 30, 40]  # Cantidades de cada billete #(✔)
 numeroDeCajero = random.randint(0, 6) #(✔)
 montoEgreso = 0 #(✔)
 tarjetas = [] #(✔)
-listaEgresos = []
+egresos = []
 
 def tarjetaRandom():
     numeroRandom = ''.join([str(random.randint(0, 9)) for _ in range(6)])
@@ -41,30 +44,31 @@ def tarjetaRandom():
     return tarjetas
 
 def nuevoMovimiento():
-    consulta = int(input("""
-                         ¿Desea realizar otro retiro?
-                         1- SI
-                         2- NO
-                            """))
-    while consulta < 1 or consulta > 2:
-        print("Opción inválida, elija una opcion correcta")
+    continuar = True
+    while continuar:
         consulta = int(input("""
-                         ¿Desea realizar otro retiro?
-                         1- SI
-                         2- NO
+                            ¿Desea realizar otro retiro?
+                            1- SI
+                            2- NO
+                            -1 Salir
                             """))
-    if consulta == 1:
-        sacarPlata(billetes_valores, billetes_cantidades)
-    else:
-        print("""
-              Muchas gracias por elegirnos! 
-              Por favor, retire su tarjeta y deje pasar al siguiente usuario""")
-        tarjetaRandom()
-        sacarPlata(billetes_valores, billetes_cantidades)
+        if consulta == -1:
+            continuar = False
+            print("Muchas gracias por elegirnos!")
+        elif consulta == 1:
+            sacarPlata(billetes_valores, billetes_cantidades)
+            continuar = False
+        elif consulta == 2:
+            print("""
+                Muchas gracias por elegirnos! 
+                Por favor, retire su tarjeta y deje pasar al siguiente usuario""")
+            tarjetaRandom()
+            sacarPlata(billetes_valores, billetes_cantidades)
+            continuar = False
+        else:
+            print("Opción inválida, elija una opción correcta")
 
-# Repensar utilizando un For (listas[i])
 def sacarBilletes(index,importe, listaBilletes, listaCantidad):
-    # Entrar a las listas por referencias, mediante parámetros, no de forma global
     print("Hay ", listaCantidad[index] ," billetes de ",listaBilletes[index])
     continuar = True
     totalFaltante = importe
@@ -87,21 +91,31 @@ def sacarBilletes(index,importe, listaBilletes, listaCantidad):
     return totalFaltante
 
 def sacarPlata(billetesValor, billetesCantidad):
-    montoEgreso = int(input("Ingrese un importe de dinero a retirar: $"))
-    total = cantidaEnCajero(billetes_valores,billetes_cantidades)
+    total = cantidaEnCajero(billetesValor, billetesCantidad)
 
-    while total < montoEgreso:
-        print("El monto supera la cantidad disponible en el cajero")
-        montoEgreso = int(input("Ingrese un nuevo importe de dinero a retirar: $"))
-    listaEgresos.append(montoEgreso)
+    if total > 0:
+        montoEgreso = int(input("Ingrese un importe de dinero a retirar: $"))
+        while montoEgreso % 100 != 0:
+            print("El cajero solo admite egresos múltiplos de 100")
+            montoEgreso = int(input("Ingrese un importe de dinero a retirar: $"))
 
-    for i in range(len(billetesCantidad)):
-        if montoEgreso > 0:
-            montoEgreso = sacarBilletes(i,montoEgreso, billetesValor, billetesCantidad)
-    nuevoMovimiento()
+        while total < montoEgreso and total > 0:
+            print("El monto supera la cantidad disponible en el cajero")
+            montoEgreso = int(input("Ingrese un nuevo importe de dinero a retirar: $"))
 
-def informarTransaciones():
-    print(listaEgresos)
+        egresos.append(montoEgreso)
+        for i in range(len(billetesCantidad)):
+            if montoEgreso > 0:
+                montoEgreso = sacarBilletes(i, montoEgreso, billetesValor, billetesCantidad)
+        nuevoMovimiento()
+    else:
+        print("El cajero ya no tiene dinero, muchas gracias por elegirnos!")
+        informarTransaciones(tarjetas, egresos)
+        return
+
+def informarTransaciones(listaDeTarjetas, listaDeEgresos):
+    print("Tarjetas ingresadas: ",listaDeTarjetas)
+    print("Egresos realizados: ",listaDeEgresos)
 
 def cantidaEnCajero(billetesValor,billetesCantidad):
     cantidadTotal = 0
@@ -120,8 +134,6 @@ Cajero Automático "MMMC" 💰💰💰
     print("Número de Cajero: #", numeroDeCajero)
     tarjetaRandom()
     sacarPlata(billetes_valores, billetes_cantidades)
-
-    informarTransaciones()
 
 if __name__=='__main__': # Entry Point
     main()
