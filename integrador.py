@@ -50,8 +50,7 @@ def informarTransaciones(listaDeTarjetas, listaDeEgresos):
     #print("%7d\t%s" %(listaDeEgresos[i], listaDeTarjetas[i]))                                     ~~~~~~~~~~~~~~~^^^
     #IndexError: list index out of range
     for i in range(len(listaDeEgresos)):
-        print("%7d\t%s" %(listaDeEgresos[i], listaDeTarjetas[i]))
-
+        print("$%d\tN° %s" %(listaDeEgresos[i], listaDeTarjetas[i]))
     if listaDeEgresos: #La transacción (monto mínimo) que se extrajo en el día
         minimo_egreso = min(listaDeEgresos)
         print("\nEl egreso mínimo del día es: $", minimo_egreso)
@@ -75,7 +74,7 @@ def contarExtraccionesPorTarjeta(listaDeTarjetas):
 
     print("\nCantidad de extracciones por tarjeta:")
     for i in range(len(tarjetas_unicas)):
-        print("Tarjeta %s : %d extracciones" % (tarjetas_unicas[i], cantidades[i]))
+        print("Tarjeta N° %s : %d extracciones" % (tarjetas_unicas[i], cantidades[i]))
 
 def nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos):
     continuar = True
@@ -94,6 +93,8 @@ def nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgr
             sacarPlata(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos)
             continuar = False
         elif consulta == 2:
+            #Cuando el primer usario saca todo el dinero enseguida, se crea una 2da tarjeta
+            #que no va a poder hacer egreso ya que total en el banco es 0
             print("""
                 Muchas gracias por elegirnos! 
                 Por favor, retire su tarjeta y deje pasar al siguiente usuario""")
