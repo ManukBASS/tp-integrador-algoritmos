@@ -19,10 +19,10 @@ IDEA: CAJERO AUTOMÁTICO:
 ALCANCE:
 
 Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero automático, el mismo debe permitir egresos de sumas de dinero. Se identifica el cajero con un numero random. Se ingresa una tarjeta al sistema, que va a tener números aleatorios. El cajero tiene un monto fijo total que se va debitando conforme se hace cada extracción. Además, tiene una suma fija de billetes (de 2000, de 1000, de 500 y de 100) que entrega. Por cada extracción se optimizará qué billetes van a ser brindados. El sistema termina al ingresar -1 como monto de extracción y deberá informar:
-•	Lista de transacciones que se hicieron en el día
-•	Lista de transacciones que se hicieron en el día por tarjeta (ordenado ascendiente y sin duplicados de tarjeta)
+•	Lista de transacciones que se hicieron en el día (✔)
+•	Lista de transacciones que se hicieron en el día por tarjeta (ascendiente y sin duplicados de tarjeta) (✔)
 •	Consulta de cantidad de extracciones por tarjeta
-•	La transacción (monto mínimo) que se extrajo en el día
+•	La transacción (monto mínimo) que se extrajo en el día (✔)
 •	La tarjeta que extrajo el monto máximo (acumulado por tarjeta)
 """
 
@@ -33,7 +33,6 @@ Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero auto
 billetes_valores = [2000, 1000, 500, 100]  # Valores de los billetes ($54000 con los billetes que tenemos) #(✔)
 billetes_cantidades = [10, 20, 30, 40]  # Cantidades de cada billete #(✔)
 numeroDeCajero = random.randint(0, 6) #(✔)
-montoEgreso = 0 #(✔)
 tarjetas = [] #(✔)
 egresos = []
 
@@ -43,7 +42,42 @@ def tarjetaRandom():
     tarjetas.append(numeroRandom)
     return tarjetas
 
-def nuevoMovimiento():
+def informarTransaciones(listaDeTarjetas, listaDeEgresos):
+    print("-----------------------------")
+    print("\tEGRESOS DEL DÍA")
+    print("-----------------------------")
+    print("EGRESO\tTARJETAS")
+    #print("%7d\t%s" %(listaDeEgresos[i], listaDeTarjetas[i]))                                     ~~~~~~~~~~~~~~~^^^
+    #IndexError: list index out of range
+    for i in range(len(listaDeEgresos)):
+        print("%7d\t%s" %(listaDeEgresos[i], listaDeTarjetas[i]))
+
+    if listaDeEgresos: #La transacción (monto mínimo) que se extrajo en el día
+        minimo_egreso = min(listaDeEgresos)
+        print("\nEl egreso mínimo del día es: $", minimo_egreso)
+    else:
+        print("\nNo hay egresos registrados.")
+    
+    contarExtraccionesPorTarjeta(listaDeTarjetas)
+
+def contarExtraccionesPorTarjeta(listaDeTarjetas):
+    #Hay problemas con los index, necesitamos saber como guardar la misma tarjeta para multiples egresos
+    tarjetas_unicas = []
+    cantidades = []
+
+    for tarjeta in listaDeTarjetas:
+        if tarjeta in tarjetas_unicas:
+            index = tarjetas_unicas.index(tarjeta)
+            cantidades[index] += 1
+        else:
+            tarjetas_unicas.append(tarjeta)
+            cantidades.append(1)
+
+    print("\nCantidad de extracciones por tarjeta:")
+    for i in range(len(tarjetas_unicas)):
+        print("Tarjeta %s : %d extracciones" % (tarjetas_unicas[i], cantidades[i]))
+
+def nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos):
     continuar = True
     while continuar:
         consulta = int(input("""
@@ -55,26 +89,27 @@ def nuevoMovimiento():
         if consulta == -1:
             continuar = False
             print("Muchas gracias por elegirnos!")
+            informarTransaciones(listaDeTarjetas, listaDeEgresos)
         elif consulta == 1:
-            sacarPlata(billetes_valores, billetes_cantidades)
+            sacarPlata(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos)
             continuar = False
         elif consulta == 2:
             print("""
                 Muchas gracias por elegirnos! 
                 Por favor, retire su tarjeta y deje pasar al siguiente usuario""")
             tarjetaRandom()
-            sacarPlata(billetes_valores, billetes_cantidades)
+            sacarPlata(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos)
             continuar = False
         else:
             print("Opción inválida, elija una opción correcta")
 
-def sacarBilletes(index,importe, listaBilletes, listaCantidad):
-    print("Hay ", listaCantidad[index] ," billetes de ",listaBilletes[index])
+def sacarBilletes(index, importe, listaBilletes, listaCantidad):
+    print("Hay ", listaCantidad[index], " billetes de ", listaBilletes[index])
     continuar = True
     totalFaltante = importe
     while listaCantidad[index] > 0 and continuar:
         if listaCantidad[index] == 0:
-            print("No quedan más billetes de ",listaBilletes[index])
+            print("No quedan más billetes de ", listaBilletes[index])
         else:
             billetes = importe // listaBilletes[index]
             cantidadDeBilletes = 0
@@ -82,15 +117,15 @@ def sacarBilletes(index,importe, listaBilletes, listaCantidad):
             if billetes > listaCantidad[index]:
                 cantidadDeBilletes = listaCantidad[index]
             else:
-                cantidadDeBilletes=billetes
+                cantidadDeBilletes = billetes
             
             listaCantidad[index] -= cantidadDeBilletes
-            totalFaltante = importe -(cantidadDeBilletes * listaBilletes[index])
-            continuar=False
-            print("Se entregan: ", cantidadDeBilletes, " billetes de ",listaBilletes[index])
+            totalFaltante = importe - (cantidadDeBilletes * listaBilletes[index])
+            continuar = False
+            print("Se entregan: ", cantidadDeBilletes, " billetes de ", listaBilletes[index])
     return totalFaltante
 
-def sacarPlata(billetesValor, billetesCantidad):
+def sacarPlata(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos):
     total = cantidaEnCajero(billetesValor, billetesCantidad)
 
     if total > 0:
@@ -107,15 +142,11 @@ def sacarPlata(billetesValor, billetesCantidad):
         for i in range(len(billetesCantidad)):
             if montoEgreso > 0:
                 montoEgreso = sacarBilletes(i, montoEgreso, billetesValor, billetesCantidad)
-        nuevoMovimiento()
+        nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos)
     else:
         print("El cajero ya no tiene dinero, muchas gracias por elegirnos!")
-        informarTransaciones(tarjetas, egresos)
+        informarTransaciones(listaDeTarjetas, listaDeEgresos)
         return
-
-def informarTransaciones(listaDeTarjetas, listaDeEgresos):
-    print("Tarjetas ingresadas: ",listaDeTarjetas)
-    print("Egresos realizados: ",listaDeEgresos)
 
 def cantidaEnCajero(billetesValor,billetesCantidad):
     cantidadTotal = 0
@@ -133,7 +164,7 @@ Cajero Automático "MMMC" 💰💰💰
 """)
     print("Número de Cajero: #", numeroDeCajero)
     tarjetaRandom()
-    sacarPlata(billetes_valores, billetes_cantidades)
+    sacarPlata(billetes_valores, billetes_cantidades, tarjetas, egresos)
 
 if __name__=='__main__': # Entry Point
     main()
