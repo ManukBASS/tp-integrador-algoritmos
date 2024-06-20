@@ -20,10 +20,10 @@ ALCANCE:
 
 Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero automático, el mismo debe permitir egresos de sumas de dinero. Se identifica el cajero con un numero random. Se ingresa una tarjeta al sistema, que va a tener números aleatorios. El cajero tiene un monto fijo total que se va debitando conforme se hace cada extracción. Además, tiene una suma fija de billetes (de 2000, de 1000, de 500 y de 100) que entrega. Por cada extracción se optimizará qué billetes van a ser brindados. El sistema termina al ingresar -1 como monto de extracción y deberá informar:
 •	Lista de transacciones que se hicieron en el día (✔)
-•	Lista de transacciones que se hicieron en el día por tarjeta (ascendiente y sin duplicados de tarjeta) (✔)
+•	Lista de transacciones que se hicieron en el día por tarjeta (ascendiente y sin duplicados de tarjeta)
 •	Consulta de cantidad de extracciones por tarjeta (✔)
 •	La transacción (monto mínimo) que se extrajo en el día (✔)
-•	La tarjeta que extrajo el monto máximo (acumulado por tarjeta)
+•	La tarjeta que extrajo el monto máximo (acumulado por tarjeta) (✔)
 """
 
 # QUEDA PENDIENTE: algoritmos de búsqueda y ordenamiento de listas
@@ -32,20 +32,22 @@ Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero auto
 # Egresos múltiplos de 100 (✔)
 # Cortar cuando el cajero llege a 0 (✔)
 # Variables
-billetes_valores = [2000, 1000, 500, 100]  # Valores de los billetes ($54000 con los billetes que tenemos) #(✔)
+billetes_valores = [2000, 1000, 500, 100]  # Valores de los billetes ($59000 con los billetes que tenemos) #(✔)
 billetes_cantidades = [10, 20, 30, 40]  # Cantidades de cada billete #(✔)
 numeroDeCajero = random.randint(0, 6) #(✔)
 tarjetas = [] #(✔)
-egresos = []
-egresosAcumulados = [] 
+egresos = [] #(✔)
 
 def tarjetaRandom(tarjetaExiste, listaDeTarjetas):
     if tarjetaExiste:
         tarjetas.append(listaDeTarjetas[-1])
     else:
-        numeroRandom = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-        print("Su num de tarjeta es: ",numeroRandom)
-        tarjetas.append(numeroRandom)
+        listaDeNumeros = [str(random.randint(0, 9)) for _ in range(6)]
+        numeroTarjeta = ''
+        for numero in listaDeNumeros:
+            numeroTarjeta += numero
+        print("Su num de tarjeta es: ", numeroTarjeta)
+        tarjetas.append(numeroTarjeta)
     return tarjetas
 
 def informarTransaciones(listaDeTarjetas, listaDeEgresos):
@@ -53,15 +55,16 @@ def informarTransaciones(listaDeTarjetas, listaDeEgresos):
     print("\tEGRESOS DEL DÍA")
     print("------------------------------")
     print("EGRESO\tTARJETAS")
+    #ACÁ tiene que haber ordenamiento burbuja para printear la lista en forma ascendente
     for i in range(len(listaDeEgresos)):
         print("$%d\tN° %s" %(listaDeEgresos[i], listaDeTarjetas[i]))
-    if listaDeEgresos: #La transacción (monto mínimo) que se extrajo en el día
-        minimo_egreso = min(listaDeEgresos)
-        print("\nEl egreso mínimo del día es: $", minimo_egreso)
-    else:
-        print("\nNo hay egresos registrados.")
+    for i in range(len(listaDeEgresos)):
+        if i==0 or listaDeEgresos[i]<minimo_egreso:
+            minimo_egreso = listaDeEgresos[i]
+    print("\nEl egreso mínimo del día es de: $", minimo_egreso)
     
     contarExtraccionesPorTarjeta(listaDeTarjetas)
+    acumularEgresos(listaDeEgresos, listaDeTarjetas)
 
 def contarExtraccionesPorTarjeta(listaDeTarjetas):
     tarjetas_unicas = []
@@ -78,6 +81,28 @@ def contarExtraccionesPorTarjeta(listaDeTarjetas):
     print("\nCantidad de extracciones por tarjeta:")
     for i in range(len(tarjetas_unicas)):
         print("Tarjeta N° %s : %d extracciones" % (tarjetas_unicas[i], cantidades[i]))
+
+def acumularEgresos(listaDeEgresos, listaDeTarjetas):
+    tarjetas_unicas = []
+    montos_acumulados = []
+
+    for i in range(len(listaDeTarjetas)):
+        tarjeta = listaDeTarjetas[i]
+        monto = listaDeEgresos[i]
+
+        if tarjeta in tarjetas_unicas:
+            index = tarjetas_unicas.index(tarjeta)
+            montos_acumulados[index] += monto
+        else:
+            tarjetas_unicas.append(tarjeta)
+            montos_acumulados.append(monto)
+
+    print("\nEgreso máximo del día:")
+    for i in range(len(montos_acumulados)):
+        if i==0 or montos_acumulados[i]>maximo_acumulado:
+            maximo_acumulado = montos_acumulados[i]
+            tarjetaMax =  tarjetas_unicas[i]
+    print("Tarjeta N° %s Acumula $%d" % (tarjetaMax, maximo_acumulado))
 
 def nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos):
     continuar = True
@@ -161,7 +186,7 @@ def cantidaEnCajero(billetesValor,billetesCantidad):
         cantidadTotal += billetesCantidad[i] * billetesValor[i]
     return cantidadTotal
 
-def main(): # Funcion principal
+def main():
     tarjetaExiste = False
     print("""
 *******************************
