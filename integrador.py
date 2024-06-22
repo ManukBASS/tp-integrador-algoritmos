@@ -19,24 +19,17 @@ IDEA: CAJERO AUTOMÁTICO:
 ALCANCE:
 
 Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero automático, el mismo debe permitir egresos de sumas de dinero. Se identifica el cajero con un numero random. Se ingresa una tarjeta al sistema, que va a tener números aleatorios. El cajero tiene un monto fijo total que se va debitando conforme se hace cada extracción. Además, tiene una suma fija de billetes (de 2000, de 1000, de 500 y de 100) que entrega. Por cada extracción se optimizará qué billetes van a ser brindados. El sistema termina al ingresar -1 como monto de extracción y deberá informar:
-•	Lista de transacciones que se hicieron en el día (✔)
-•	Lista de transacciones que se hicieron en el día por tarjeta (ascendiente y sin duplicados de tarjeta)
-•	Consulta de cantidad de extracciones por tarjeta (✔)
-•	La transacción (monto mínimo) que se extrajo en el día (✔)
-•	La tarjeta que extrajo el monto máximo (acumulado por tarjeta) (✔)
+•	Lista de transacciones que se hicieron en el día
+•	Lista de transacciones que se hicieron en el día por tarjeta (ascendente y sin duplicados de tarjeta)
+•	Consulta de cantidad de extracciones por tarjeta
+•	La transacción (monto mínimo) que se extrajo en el día
+•	La tarjeta que extrajo el monto máximo (acumulado por tarjeta)
 """
-
-# QUEDA PENDIENTE: algoritmos de búsqueda y ordenamiento de listas
-
-# Condicion de fin (-1) (✔)
-# Egresos múltiplos de 100 (✔)
-# Cortar cuando el cajero llege a 0 (✔)
-# Variables
-billetes_valores = [2000, 1000, 500, 100]  # Valores de los billetes ($59000 con los billetes que tenemos) #(✔)
-billetes_cantidades = [10, 20, 30, 40]  # Cantidades de cada billete #(✔)
-numeroDeCajero = random.randint(0, 6) #(✔)
-tarjetas = [] #(✔)
-egresos = [] #(✔)
+billetes_valores = [2000, 1000, 500, 100]
+billetes_cantidades = [10, 20, 30, 40]
+numeroDeCajero = random.randint(0, 6) 
+tarjetas = [] 
+egresos = [] 
 
 def tarjetaRandom(tarjetaExiste, listaDeTarjetas):
     if tarjetaExiste:
@@ -55,7 +48,6 @@ def informarTransaciones(listaDeTarjetas, listaDeEgresos):
     print("\tEGRESOS DEL DÍA")
     print("------------------------------")
     print("EGRESO\tTARJETAS")
-    #ACÁ tiene que haber ordenamiento burbuja para printear la lista en forma ascendente
     for i in range(len(listaDeEgresos)):
         print("$%d\tN° %s" %(listaDeEgresos[i], listaDeTarjetas[i]))
     for i in range(len(listaDeEgresos)):
@@ -96,13 +88,32 @@ def acumularEgresos(listaDeEgresos, listaDeTarjetas):
         else:
             tarjetas_unicas.append(tarjeta)
             montos_acumulados.append(monto)
+    
+    listaDeMontosAcumulados = len(montos_acumulados)
+    for i in range(listaDeMontosAcumulados):
+        for j in range(0, listaDeMontosAcumulados-1-i):
+            if (montos_acumulados[j] > montos_acumulados[j+1]):
+                aux = montos_acumulados[j]
+                montos_acumulados[j] = montos_acumulados[j+1]
+                montos_acumulados[j+1] = aux
 
-    print("\nEgreso máximo del día:")
+                aux = tarjetas_unicas[j]
+                tarjetas_unicas[j] = tarjetas_unicas[j+1]
+                tarjetas_unicas[j+1] = aux
+    
+    print("------------------------------")
+    print("\tMONTOS ACUMULADOS")
+    print("------------------------------")
+    print("MONTO\tTARJETA")
     for i in range(len(montos_acumulados)):
         if i==0 or montos_acumulados[i]>maximo_acumulado:
             maximo_acumulado = montos_acumulados[i]
             tarjetaMax =  tarjetas_unicas[i]
-    print("Tarjeta N° %s Acumula $%d" % (tarjetaMax, maximo_acumulado))
+        print("$%d\tN° %s" %(montos_acumulados[i], tarjetas_unicas[i]))
+    print("------------------------------")
+    print("\tMONTO MÁXIMO")
+    print("------------------------------")
+    print("Tarjeta N° %s acumuló un máximo de $%d" % (tarjetaMax, maximo_acumulado))
 
 def nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos):
     continuar = True
@@ -123,8 +134,6 @@ def nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgr
             sacarPlata(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos)
             continuar = False
         elif consulta == 2:
-            #Cuando el primer usario saca todo el dinero enseguida, se crea una 2da tarjeta
-            #que no va a poder hacer egreso ya que total en el banco es 0
             tarjetaExiste = False
             print("""
                 Muchas gracias por elegirnos! 
@@ -199,5 +208,5 @@ Cajero Automático "MMMC" 💰💰💰
     tarjetaRandom(tarjetaExiste, tarjetas)
     sacarPlata(billetes_valores, billetes_cantidades, tarjetas, egresos)
 
-if __name__=='__main__': # Entry Point
+if __name__=='__main__':
     main()
