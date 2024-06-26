@@ -25,23 +25,27 @@ Una entidad bancaria nos ha encargado el desarrollo de un sistema de cajero auto
 •	La transacción (monto mínimo) que se extrajo en el día
 •	La tarjeta que extrajo el monto máximo (acumulado por tarjeta)
 """
-billetes_valores = [2000, 1000, 500, 100]
-billetes_cantidades = [10, 20, 30, 40]
-numeroDeCajero = random.randint(0, 6) 
-tarjetas = [] 
-egresos = [] 
 
-def tarjetaRandom(tarjetaExiste, listaDeTarjetas):
+def busquedaEnListas(lista,valorBuscado):
+    posicion =- 1
+    i=0
+    while posicion==-1 and i<len(lista):
+        if lista[i]==valorBuscado:
+            posicion=i
+        i+=1
+    return posicion
+
+def tarjetaRandom(listaTarjetas, tarjetaExiste, listaDeTarjetas):
     if tarjetaExiste:
-        tarjetas.append(listaDeTarjetas[-1])
+        listaTarjetas.append(listaDeTarjetas[-1])
     else:
-        listaDeNumeros = [str(random.randint(0, 9)) for _ in range(6)]
         numeroTarjeta = ''
-        for numero in listaDeNumeros:
-            numeroTarjeta += numero
+        for i in range(6):
+            listaDeNumeros = str(random.randint(0, 9))
+            numeroTarjeta += listaDeNumeros
         print("Su num de tarjeta es: ", numeroTarjeta)
-        tarjetas.append(numeroTarjeta)
-    return tarjetas
+        listaTarjetas.append(numeroTarjeta)
+    return listaTarjetas
 
 def informarTransaciones(listaDeTarjetas, listaDeEgresos):
     print("------------------------------")
@@ -61,14 +65,15 @@ def informarTransaciones(listaDeTarjetas, listaDeEgresos):
 def contarExtraccionesPorTarjeta(listaDeTarjetas):
     tarjetas_unicas = []
     cantidades = []
+    for i in range(len(listaDeTarjetas)):
+        tarjeta = listaDeTarjetas[i]
+        posicion = busquedaEnListas(tarjetas_unicas, tarjeta)
 
-    for tarjeta in listaDeTarjetas:
-        if tarjeta in tarjetas_unicas:
-            index = tarjetas_unicas.index(tarjeta)
-            cantidades[index] += 1
-        else:
+        if posicion == -1:
             tarjetas_unicas.append(tarjeta)
             cantidades.append(1)
+        else:
+            cantidades[posicion] += 1
 
     print("\nCantidad de extracciones por tarjeta:")
     for i in range(len(tarjetas_unicas)):
@@ -81,13 +86,13 @@ def acumularEgresos(listaDeEgresos, listaDeTarjetas):
     for i in range(len(listaDeTarjetas)):
         tarjeta = listaDeTarjetas[i]
         monto = listaDeEgresos[i]
+        posicion = busquedaEnListas(tarjetas_unicas, tarjeta)
 
-        if tarjeta in tarjetas_unicas:
-            index = tarjetas_unicas.index(tarjeta)
-            montos_acumulados[index] += monto
-        else:
+        if posicion == -1:
             tarjetas_unicas.append(tarjeta)
             montos_acumulados.append(monto)
+        else:
+            montos_acumulados[posicion] += monto
     
     listaDeMontosAcumulados = len(montos_acumulados)
     for i in range(listaDeMontosAcumulados):
@@ -130,7 +135,7 @@ def nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgr
             print("Muchas gracias por elegirnos!")
             informarTransaciones(listaDeTarjetas, listaDeEgresos)
         elif consulta == 1:
-            tarjetaRandom(tarjetaExiste, listaDeTarjetas)
+            tarjetaRandom(listaDeTarjetas, tarjetaExiste, listaDeTarjetas)
             sacarPlata(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos)
             continuar = False
         elif consulta == 2:
@@ -138,7 +143,7 @@ def nuevoMovimiento(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgr
             print("""
                 Muchas gracias por elegirnos! 
                 Por favor, retire su tarjeta y deje pasar al siguiente usuario""")
-            tarjetaRandom(tarjetaExiste, listaDeTarjetas)
+            tarjetaRandom(listaDeTarjetas, tarjetaExiste, listaDeTarjetas)
             sacarPlata(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos)
             continuar = False
         else:
@@ -179,7 +184,7 @@ def sacarPlata(billetesValor, billetesCantidad, listaDeTarjetas, listaDeEgresos)
             print("El monto supera la cantidad disponible en el cajero")
             montoEgreso = int(input("Ingrese un nuevo importe de dinero a retirar: $"))
 
-        egresos.append(montoEgreso)
+        listaDeEgresos.append(montoEgreso)
         for i in range(len(billetesCantidad)):
             if montoEgreso > 0:
                 montoEgreso = sacarBilletes(i, montoEgreso, billetesValor, billetesCantidad)
@@ -196,6 +201,11 @@ def cantidaEnCajero(billetesValor,billetesCantidad):
     return cantidadTotal
 
 def main():
+    billetes_valores = [2000, 1000, 500, 100]
+    billetes_cantidades = [10, 20, 30, 40]
+    numeroDeCajero = random.randint(0, 6) 
+    tarjetas = [] 
+    egresos = [] 
     tarjetaExiste = False
     print("""
 *******************************
@@ -205,7 +215,7 @@ Cajero Automático "MMMC" 💰💰💰
 *******************************
 """)
     print("Número de Cajero: #", numeroDeCajero)
-    tarjetaRandom(tarjetaExiste, tarjetas)
+    tarjetaRandom(tarjetas, tarjetaExiste, tarjetas)
     sacarPlata(billetes_valores, billetes_cantidades, tarjetas, egresos)
 
 if __name__=='__main__':
